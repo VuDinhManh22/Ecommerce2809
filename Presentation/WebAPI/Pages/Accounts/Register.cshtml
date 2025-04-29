@@ -1,0 +1,67 @@
+﻿@page
+@{
+    Layout = "~/Pages/Shared/_Auth.cshtml";
+    ViewBag.Title = "Register";
+}
+
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/Accounts/Register.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+
+<div id="app" v-cloak>
+
+    <indoskeleton v-if="pageLoading"></indoskeleton>
+
+    <!-- Main Content -->
+    <div v-if="!pageLoading" class="mt-5">
+        <h1 class="text-center mb-4">
+            <a href="/Index" style="color: var(--header-bg);">
+                <i class="bi bi-house-fill" style="color: var(--header-bg);"></i>
+            </a>
+            Register Form
+        </h1>
+
+        <form v-on:submit.prevent="handleRegisterSubmit" class="mx-auto">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" v-model="form.email" id="email" class="form-control" placeholder="Enter your email" required />
+                <span v-if="errors.email" class="text-danger">{{ errors.email }}</span>
+            </div>
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name:</label>
+                <input type="text" v-model="form.firstName" id="firstName" class="form-control" placeholder="Enter your first name" required />
+                <span v-if="errors.firstName" class="text-danger">{{ errors.firstName }}</span>
+            </div>
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name:</label>
+                <input type="text" v-model="form.lastName" id="lastName" class="form-control" placeholder="Enter your last name" required />
+                <span v-if="errors.lastName" class="text-danger">{{ errors.lastName }}</span>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" v-model="form.password" id="password" class="form-control" placeholder="Enter your password" required />
+                <span v-if="errors.password" class="text-danger">{{ errors.password }}</span>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password:</label>
+                <input type="password" v-model="form.confirmPassword" id="confirmPassword" class="form-control" placeholder="Confirm your password" required />
+                <span v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}</span>
+            </div>
+            <indobutton :type="'submit'"
+                        :is-submitting="isSubmitting"
+                        submitting-text="Submitting..."
+                        default-text="Register"
+                        button-class="btn btn-primary w-100 mt-3"></indobutton>
+        </form>
+
+        <!-- Success Message -->
+        <div v-if="successMessage" class="alert alert-success mt-4 text-center">
+            {{ successMessage }}
+        </div>
+    </div>
+</div>

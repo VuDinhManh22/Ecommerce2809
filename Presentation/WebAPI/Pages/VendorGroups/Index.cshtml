@@ -1,0 +1,217 @@
+﻿@page
+@{
+    ViewBag.Title = "Vendor Group";
+}
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/VendorGroups/Index.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div id="app" v-cloak data-key="VendorGroup:Read">
+    <div v-if="pageLoading">
+        <div>Loading...</div>
+        <indoloading />
+    </div>
+    <div v-else>
+
+        <div>
+
+            <h4>@ViewBag.Title List</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <indosearchbox v-on:search-action="handleSearchAction" />
+            </div>
+
+            <div v-show="hasClaimAccess('VendorGroup:Create')" class="d-flex justify-content-end">
+                <button class="btn btn-primary ms-auto" v-on:click="handleClickCreate">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+
+
+
+            @* data list / data table *@
+            <div>
+                <indotable :columns="columns"
+                           :data="paged.data"
+                           :limit="paged.limit"
+                           :page="paged.page"
+                           :pages="paged.pages"
+                           :total-records="paged.totalRecords"
+                           :total-pages="paged.totalPages"
+                           :table-loading="paged.tableLoading"
+                           :sort-by="paged.sortBy"
+                           :sort-direction="paged.sortDirection"
+                           :selected-row="paged.selectedRow"
+                           v-on:table-action="handleTableAction"
+                           v-on:table-action-rowclick="handleTableActionRowClick" />
+
+            </div>
+
+
+            @* data detail / data form *@
+            <div v-show="paged.selectedRow" class="mt-5">
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 v-show="pageMode.read">Selected Data</h4>
+                        <h4 v-show="pageMode.create">Create Data</h4>
+                        <h4 v-show="pageMode.update">Update Data</h4>
+                        <h4 v-show="pageMode.delete">Delete Data</h4>
+                        <div class="d-flex align-items-center">
+                            <button v-show="paged.selectedRow?.id && hasClaimAccess('VendorGroup:Update')" class="btn btn-primary me-2" v-on:click="handleClickEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button v-show="paged.selectedRow?.id && hasClaimAccess('VendorGroup:Delete')" class="btn btn-danger" v-on:click="handleClickDelete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <form v-on:submit.prevent="handleSubmitForm">
+
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="card-title mb-0">{{ paged.selectedRow?.name ?? 'N/A' }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-footer">
+                                    <h6 class="fw-bold">Detail:</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width: 25%;"><strong>Name</strong></td>
+                                                    <td style="width: 5%;">:</td>
+                                                    <td style="width: 70%;">
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.name ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.name" type="text" class="form-control" id="name" placeholder="Enter name" required>
+                                                            <span v-if="errorData.name" class="text-danger">{{ errorData.name }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Description</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="(pageMode.read || pageMode.delete)">
+                                                            {{ paged.selectedRow?.description ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <textarea v-model="formData.description" class="form-control" id="description" rows="3" placeholder="Enter description"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-show="pageMode.create || pageMode.update" class="card-footer text-end">
+                                <button type="button" class="btn btn-secondary me-2" v-on:click="handleClickClose">
+                                    <i class="bi bi-arrow-left"></i> Close
+                                </button>
+                                <indobutton v-show="hasClaimAccess('VendorGroup:Create') || hasClaimAccess('VendorGroup:Update')" :type="'submit'"
+                                            :is-submitting="isSubmitting"
+                                            submitting-text="Submitting..."
+                                            button-class="btn btn-primary">
+                                    <i class="bi bi-plus"></i> Submit
+                                </indobutton>
+                            </div>
+                        </div>
+                    </form>
+                    <div v-show="successMessage" class="alert alert-success mt-4 text-center">
+                        {{ successMessage }}
+                    </div>
+
+                    @* child *@
+                    <div v-show="paged.selectedRow?.id && hasClaimAccess('VendorSubGroup:Read')" class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="card-footer p-2">
+                                <div class="d-flex justify-content-between align-items-center mb-0">
+                                    <h6 class="fw-bold mb-0">Sub Groups:</h6>
+                                    <div class="d-flex align-items-center">
+                                        <button v-show="hasClaimAccess('VendorSubGroup:Create')" class="btn btn-success me-2 rounded-circle d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;" v-on:click="handleClickCreateChild">
+                                            <i class="bi bi-plus-circle" style="font-size: 16px;"></i>
+                                        </button>
+                                        <button v-if="pagedChild.selectedRow && hasClaimAccess('VendorSubGroup:Update')" class="btn btn-success me-2 rounded-circle d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;" v-on:click="handleClickEditChild">
+                                            <i class="bi bi-pencil" style="font-size: 16px;"></i>
+                                        </button>
+                                        <button v-if="pagedChild.selectedRow && hasClaimAccess('VendorSubGroup:Delete')" class="btn btn-danger rounded-circle d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;" v-on:click="handleClickDeleteChild">
+                                            <i class="bi bi-trash" style="font-size: 16px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="pagedChild.data.length" class="mt-0">
+                                    <indotable :columns="childColumns"
+                                               :data="pagedChild.data"
+                                               :sort-by="pagedChild.sortBy"
+                                               :sort-direction="pagedChild.sortDirection"
+                                               :selected-row="pagedChild.selectedRow"
+                                               v-on:table-action="handleTableChildAction"
+                                               v-on:table-action-rowclick="handleTableChildActionRowClick"
+                                               table-class="table-light"
+                                               :client-side-mode="true" />
+                                </div>
+                                <div v-else>
+                                    <p>No sub groups available.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" data-modal="childModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">
+                        <span v-show="childMode.create">Create Data</span>
+                        <span v-show="childMode.read">Read Data</span>
+                        <span v-show="childMode.update">Update Data</span>
+                        <span v-show="childMode.delete">Delete Data</span>
+                    </h5>
+                    <button type="button" class="btn-close" v-on:click="handleCloseModalChild" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form v-on:submit.prevent="handleSubmitFormChild">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" v-model="formChildData.name" required />
+                            <span v-if="errorChildData.name" class="text-danger">{{ errorChildData.name }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" v-model="formChildData.description" rows="3"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" v-on:click="handleCloseModalChild">Close</button>
+                            <button type="submit"
+                                    :class="childMode.delete ? 'btn btn-danger' : 'btn btn-primary'">
+                                {{ childMode.delete ? 'Delete' : 'Submit' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+

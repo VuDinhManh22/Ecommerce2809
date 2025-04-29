@@ -1,0 +1,323 @@
+﻿@page
+@{
+    ViewBag.Title = "Vendor Contact";
+}
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/VendorContacts/Index.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div id="app" v-cloak data-key="VendorContact:Read">
+    <div v-if="pageLoading">
+        <div>Loading...</div>
+        <indoloading />
+    </div>
+    <div v-else>
+
+        <div>
+
+            <h4>@ViewBag.Title List</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <indosearchbox v-on:search-action="handleSearchAction" />
+            </div>
+
+            <div v-show="hasClaimAccess('VendorContact:Create')" class="d-flex justify-content-end">
+                <button class="btn btn-primary ms-auto" v-on:click="handleClickCreate">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+
+
+
+            @* data list / data table *@
+            <div>
+                <indotable :columns="columns"
+                           :data="paged.data"
+                           :limit="paged.limit"
+                           :page="paged.page"
+                           :pages="paged.pages"
+                           :total-records="paged.totalRecords"
+                           :total-pages="paged.totalPages"
+                           :table-loading="paged.tableLoading"
+                           :sort-by="paged.sortBy"
+                           :sort-direction="paged.sortDirection"
+                           :selected-row="paged.selectedRow"
+                           v-on:table-action="handleTableAction"
+                           v-on:table-action-rowclick="handleTableActionRowClick" />
+
+            </div>
+
+
+            @* data detail / data form *@
+            <div v-show="paged.selectedRow" class="mt-5">
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 v-show="pageMode.read">Selected Data</h4>
+                        <h4 v-show="pageMode.create">Create Data</h4>
+                        <h4 v-show="pageMode.update">Update Data</h4>
+                        <h4 v-show="pageMode.delete">Delete Data</h4>
+                        <div class="d-flex align-items-center">
+                            <button v-show="paged.selectedRow?.id && hasClaimAccess('VendorContact:Update')" class="btn btn-primary me-2" v-on:click="handleClickEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button v-show="paged.selectedRow?.id && hasClaimAccess('VendorContact:Delete')" class="btn btn-danger" v-on:click="handleClickDelete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <form v-on:submit.prevent="handleSubmitForm">
+
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="card-title mb-0">{{ paged.selectedRow?.firstName }} {{ paged.selectedRow?.lastName }}</h5>
+                                <p class="card-subtitle">{{ `${paged.selectedRow?.jobTitle} at ${paged.selectedRow?.vendorName}` }}</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-footer">
+                                    <h6 class="fw-bold">Detail:</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width: 25%;"><strong>Vendor</strong></td>
+                                                    <td style="width: 5%;">:</td>
+                                                    <td style="width: 70%;">
+                                                        <div v-show="pageMode.read || pageMode.update || pageMode.delete">
+                                                            {{ paged.selectedRow?.vendorName ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create" class="mb-3">
+                                                            <select v-model="formData.vendorId" class="form-select" id="vendorId" required>
+                                                                <option v-for="vendor in vendorLookup" :key="vendor.value" :value="vendor.value">
+                                                                    {{ vendor.text }}
+                                                                </option>
+                                                            </select>
+                                                            <span v-if="errorData.vendorId" class="text-danger">{{ errorData.vendorId }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>First Name</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.firstName ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.firstName" type="text" class="form-control" id="firstName" placeholder="Enter First Name" required>
+                                                            <span v-if="errorData.firstName" class="text-danger">{{ errorData.firstName }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Last Name</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.lastName ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.lastName" type="text" class="form-control" id="lastName" placeholder="Enter Last Name" required>
+                                                            <span v-if="errorData.lastName" class="text-danger">{{ errorData.lastName }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Gender</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.genderName ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <select v-model="formData.genderId" class="form-select" id="genderId" required>
+                                                                <option v-for="gender in genderLookup" :key="gender.value" :value="gender.value">
+                                                                    {{ gender.text }}
+                                                                </option>
+                                                            </select>
+                                                            <span v-if="errorData.genderId" class="text-danger">{{ errorData.genderId }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Description</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="(pageMode.read || pageMode.delete)">
+                                                            {{ paged.selectedRow?.description ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <textarea v-model="formData.description" class="form-control" id="description" rows="3" placeholder="Enter description"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Job Title</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.jobTitle ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.jobTitle" type="text" class="form-control" id="jobTitle" placeholder="Enter Job Title" required>
+                                                            <span v-if="errorData.jobTitle" class="text-danger">{{ errorData.jobTitle }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Mobile Phone</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.mobilePhone ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.mobilePhone" type="text" class="form-control" id="mobilePhone" placeholder="Enter Mobile Phone">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Social Media</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.socialMedia ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.socialMedia" type="text" class="form-control" id="socialMedia" placeholder="Enter Social Media">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Address</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.address ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <textarea v-model="formData.address" class="form-control" id="address" rows="3" placeholder="Enter Address"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>City</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.city ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.city" type="text" class="form-control" id="city" placeholder="Enter City">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>State/Province</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.stateOrProvince ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.stateOrProvince" type="text" class="form-control" id="stateOrProvince" placeholder="Enter State/Province">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Zip Code</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.zipCode ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.zipCode" type="text" class="form-control" id="zipCode" placeholder="Enter Zip Code">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Country</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.country ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.country" type="text" class="form-control" id="country" placeholder="Enter Country">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Phone</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.phone ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.phone" type="text" class="form-control" id="phone" placeholder="Enter Phone" required>
+                                                            <span v-if="errorData.phone" class="text-danger">{{ errorData.phone }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Email</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.email ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.email" type="email" class="form-control" id="email" placeholder="Enter Email" required>
+                                                            <span v-if="errorData.email" class="text-danger">{{ errorData.email }}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Website</strong></td>
+                                                    <td>:</td>
+                                                    <td>
+                                                        <div v-show="pageMode.read || pageMode.delete">
+                                                            {{ paged.selectedRow?.website ?? 'N/A' }}
+                                                        </div>
+                                                        <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                            <input v-model="formData.website" type="text" class="form-control" id="website" placeholder="Enter Website">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-show="pageMode.create || pageMode.update" class="card-footer text-end">
+                                <button type="button" class="btn btn-secondary me-2" v-on:click="handleClickClose">
+                                    <i class="bi bi-arrow-left"></i> Close
+                                </button>
+                                <indobutton v-show="hasClaimAccess('VendorContact:Create') || hasClaimAccess('VendorContact:Update')" :type="'submit'"
+                                            :is-submitting="isSubmitting"
+                                            submitting-text="Submitting..."
+                                            button-class="btn btn-primary">
+                                    <i class="bi bi-plus"></i> Submit
+                                </indobutton>
+                            </div>
+                        </div>
+                    </form>
+                    <div v-show="successMessage" class="alert alert-success mt-4 text-center">
+                        {{ successMessage }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+

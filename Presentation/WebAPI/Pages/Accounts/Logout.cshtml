@@ -1,0 +1,58 @@
+﻿@page
+@{
+    Layout = "~/Pages/Shared/_Auth.cshtml";
+    ViewBag.Title = "Logout";
+}
+
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/Accounts/Logout.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div id="app" v-cloak>
+    <!-- Loading Screen -->
+    <indoloading v-if="pageLoading"></indoloading>
+
+    <!-- Main Content -->
+    <div v-if="!pageLoading" class="mt-5">
+        <h1 class="text-center mb-4">
+            <a v-on:click="handleBackToHome" style="color: var(--header-bg); cursor: pointer;">
+                <i class="bi bi-house-fill" style="color: var(--header-bg);"></i>
+            </a>
+            Logout Form
+        </h1>
+
+
+        <!-- Logout Button -->
+        <div class="mx-auto">
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email:</label>
+                <input type="email" v-model="logoutForm.email" id="loginEmail" class="form-control" disabled />
+                
+            </div>
+            <div class="mb-3">
+                <label for="loginPassword" class="form-label">Password:</label>
+                <input type="password" v-model="logoutForm.password" id="loginPassword" class="form-control" disabled />
+                
+            </div>
+            <form v-on:submit.prevent="handleLogoutSubmit">
+                <indobutton type="'submit'"
+                            :is-submitting="isSubmitting"
+                            submitting-text="Logging out..."
+                            default-text="Click to Logout"
+                            button-class="btn btn-secondary mt-3">
+                </indobutton>
+            </form>
+
+        </div>
+
+        <!-- Success Message -->
+        <div v-if="successMessage" class="alert alert-success mt-4 text-center">
+            {{ successMessage }}
+        </div>
+
+    </div>
+</div>

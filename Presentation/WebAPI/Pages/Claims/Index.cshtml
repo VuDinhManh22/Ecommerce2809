@@ -1,0 +1,101 @@
+﻿@page
+@{
+    ViewBag.Title = "Claim";
+}
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/Claims/Index.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div id="app" v-cloak data-key="Claim:Read">
+    <div v-if="pageLoading">
+        <div>Loading...</div>
+        <indoloading />
+    </div>
+    <div v-else>
+
+        <div>
+
+            <h4>@ViewBag.Title List</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <indosearchbox v-on:search-action="handleSearchAction" />
+            </div>
+
+
+            @* data list / data table *@
+            <div>
+                <indotable :columns="columns"
+                           :data="paged.data"
+                           :limit="paged.limit"
+                           :page="paged.page"
+                           :pages="paged.pages"
+                           :total-records="paged.totalRecords"
+                           :total-pages="paged.totalPages"
+                           :table-loading="paged.tableLoading"
+                           :sort-by="paged.sortBy"
+                           :sort-direction="paged.sortDirection"
+                           :selected-row="paged.selectedRow"
+                           v-on:table-action="handleTableAction"
+                           v-on:table-action-rowclick="handleTableActionRowClick" />
+
+            </div>
+
+
+            @* data detail / data form *@
+            <div v-show="paged.selectedRow" class="mt-5">
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 v-show="pageMode.read">Selected Data</h4>
+                        <h4 v-show="pageMode.create">Create Data</h4>
+                        <h4 v-show="pageMode.update">Update Data</h4>
+                        <h4 v-show="pageMode.delete">Delete Data</h4>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">{{ paged.selectedRow?.value ?? 'N/A' }}</h5>
+                            <p class="card-subtitle">{{ paged.selectedRow?.type ?? 'N/A' }}</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-footer">
+                                <h6 class="fw-bold">Detail:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td style="width: 25%;"><strong>Type</strong></td>
+                                                <td style="width: 5%;">:</td>
+                                                <td style="width: 70%;">
+                                                    <div v-show="pageMode.read || pageMode.update || pageMode.delete">
+                                                        {{ paged.selectedRow?.type ?? 'N/A' }}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Value</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.value ?? 'N/A' }}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+

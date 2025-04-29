@@ -1,0 +1,119 @@
+﻿<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indotalent - @ViewBag.Title</title>
+
+    @* css *@
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/src/Theme/Content.css" />
+    @await RenderSectionAsync("styles", required: false)
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+    </style>
+
+    @* javascript *@
+    <script async src="/libs/esmoduleshims/es-module-shims.min.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "vue": "/libs/vue/vue.esm-browser.prod.js",
+            "indosearchbox": "/src/Components/indosearchbox.js",
+            "indotable": "/src/Components/indotable.js",
+            "indobutton": "/src/Components/indobutton.js",
+            "indoskeleton": "/src/Components/indoskeleton.js",
+            "indoloading": "/src/Components/indoloading.js",
+            "useAxios": "/src/Composables/useAxios.js",
+            "useStorageManager": "/src/Composables/useStorageManager.js",
+            "useAccessManager": "/src/Composables/useAccessManager.js",
+            "usePagedList": "/src/Composables/usePagedList.js",
+            "useClientSideSorting": "/src/Composables/useClientSideSorting.js"
+          }
+        }
+    </script>
+    <script src="~/libs/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="~/libs/axios/axios.min.js" defer></script>
+    <script src="~/libs/sweetalert/sweetalert2v11.js" defer></script>
+    <script src="~/libs/echarts/echarts.min.js" defer></script>
+    <script src="~/src/Theme/Content.js" defer></script>
+
+
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <!-- Clickable sidebar top (Logo/Product Name) -->
+        <div class="sidebar-top" id="toggleSidebar">
+            <i class="bi bi-box icon-logo"></i>
+            <h4 class="mb-0 brand-text">INDO</h4>
+        </div>
+
+        <!-- User Greeting -->
+        <div class="user-info my-3 px-3">
+            <p class="text-white">Hello, <span id="username">UserName</span>!</p>
+        </div>
+
+        <!-- Menu items -->
+        <div class="menu">
+            <!-- JavaScript will inject menu items here -->
+        </div>
+    </div>
+
+
+    <div class="main-content" id="main-content">
+
+        <!-- Header section -->
+        <div class="header d-flex justify-content-between align-items-center px-4">
+            <!-- Header title -->
+            <h2 class="header-title">@ViewBag.Title</h2>
+
+            <!-- Logout link with open door icon -->
+            <a href="/Accounts/Logout" class="d-flex align-items-center" style="text-decoration: none; color: inherit;">
+                <i class="bi bi-door-open-fill" style="font-size: 1.25rem; color: white;"></i>
+                <span class="ms-2">Logout</span>
+            </a>
+        </div>
+
+
+
+
+        <!-- Body section -->
+        <div class="body-content">
+            @RenderBody()
+        </div>
+
+        <!-- Footer section -->
+        <footer class="border-top footer text-muted">
+            <div class="footer-content" style="width: 100%; text-align: left; padding-left: 20px;">
+                
+                &copy; @DateTime.Now.Year INDOTALENT | Active Config: <span id="activeConfig"></span> | Currency: <span id="activeCurrency"></span>
+
+                @if (Configuration.GetValue<bool>("EnableSwaggerInProduction"))
+                {
+                    <span> |</span><a href="/swagger" target="_blank" style="margin-left: 15px;">Swagger</a>
+                }
+            </div>
+        </footer>
+
+
+
+
+
+    </div>
+    @await RenderSectionAsync("scripts", required: false)
+</body>
+</html>

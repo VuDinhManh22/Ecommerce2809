@@ -1,0 +1,33 @@
+﻿@page
+@{
+    ViewBag.Title = "Unauthorized";
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div class="container vh-80 d-flex align-items-center justify-content-center">
+    <div class="text-center">
+        <img src="~/src/Theme/Img/placeholde150x150.png" alt="Forbidden Icon" class="img-fluid mb-4">
+        <h1 class="display-4 text-danger">Access Denied</h1>
+        <p class="lead mb-4">You do not have permission to access this page. Please check your credentials or contact support.</p>
+        <a href="/" class="btn custom-btn btn-lg">
+            <i class="bi bi-arrow-left-circle"></i> Go Back to Home
+        </a>
+    </div>
+</div>
+
+@section styles {
+    <style>
+        .custom-btn {
+          background-color: var(--header-bg);
+          border: none;
+          color: white;
+        }
+
+        .custom-btn:hover {
+          background-color: var(--header-bg-hover); /* Optional for hover effect */
+        }
+    </style>
+}

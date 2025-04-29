@@ -1,0 +1,314 @@
+﻿@page
+@{
+    ViewBag.Title = "Member";
+}
+@section scripts {
+    <script type="module" src="@Url.Content("/src/Pages/Members/Index.js")"></script>
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<div id="app" v-cloak data-key="Member:Read">
+    <div v-if="pageLoading">
+        <div>Loading...</div>
+        <indoloading />
+    </div>
+    <div v-else>
+        <h4>@ViewBag.Title List</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <indosearchbox v-on:search-action="handleSearchAction" />
+        </div>
+
+        <div v-show="hasClaimAccess('Member:Create')" class="d-flex justify-content-end">
+            <button class="btn btn-primary ms-auto" v-on:click="handleClickCreate">
+                <i class="bi bi-plus"></i>
+            </button>
+        </div>
+
+        @* data list / data table *@
+        <div>
+            <indotable :columns="columns"
+                       :data="paged.data"
+                       :limit="paged.limit"
+                       :page="paged.page"
+                       :pages="paged.pages"
+                       :total-records="paged.totalRecords"
+                       :total-pages="paged.totalPages"
+                       :table-loading="paged.tableLoading"
+                       :sort-by="paged.sortBy"
+                       :sort-direction="paged.sortDirection"
+                       :selected-row="paged.selectedRow"
+                       v-on:table-action="handleTableAction"
+                       v-on:table-action-rowclick="handleTableActionRowClick" />
+
+        </div>
+
+        @* data detail / data form *@
+        <div v-show="paged.selectedRow" class="mt-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Profile Picture</h4>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <img :src="imageUrl" alt="Profile Picture" class="img-fluid" v-if="imageUrl">
+                </div>
+                <div class="card-footer d-flex justify-content-center align-items-center">
+                    <input type="file" v-on:change="handleProfilePictureChange" />
+                    <button class="btn btn-primary" v-on:click="uploadProfilePicture" v-bind:disabled="!selectedProfilePicture">Upload</button>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 v-show="pageMode.read">Selected Data</h4>
+                    <h4 v-show="pageMode.create">Create Data</h4>
+                    <h4 v-show="pageMode.update">Update Data</h4>
+                    <h4 v-show="pageMode.delete">Delete Data</h4>
+                    <div class="d-flex align-items-center">
+                        <button v-show="paged.selectedRow?.id && hasClaimAccess('Member:Update')" class="btn btn-primary me-2" v-on:click="handleClickEdit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button v-show="paged.selectedRow?.id && hasClaimAccess('Member:Delete')" class="btn btn-danger" v-on:click="handleClickDelete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <form v-on:submit.prevent="handleSubmitForm">
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">{{ paged.selectedRow?.email ?? 'N/A' }}</h5>
+                            <p class="card-subtitle">{{ (paged.selectedRow?.firstName || '') + ' ' + (paged.selectedRow?.lastName || '') || 'N/A' }}</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-footer">
+                                <h6 class="fw-bold">Detail:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td style="width: 25%;"><strong>Email</strong></td>
+                                                <td style="width: 5%;">:</td>
+                                                <td style="width: 70%;">
+                                                    <div v-show="pageMode.read || pageMode.update || pageMode.delete">
+                                                        {{ paged.selectedRow?.email ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create" class="mb-3">
+                                                        <input v-model="formData.email" type="text" class="form-control" id="email" placeholder="Enter Email" required>
+                                                        <span v-if="errorData.email" class="text-danger">{{ errorData.email }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>First Name</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.firstName ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.firstName" type="text" class="form-control" id="firstName" placeholder="Enter First Name" required>
+                                                        <span v-if="errorData.firstName" class="text-danger">{{ errorData.firstName }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Last Name</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.lastName ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.lastName" type="text" class="form-control" id="lastName" placeholder="Enter Last Name" required>
+                                                        <span v-if="errorData.lastName" class="text-danger">{{ errorData.lastName }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Password</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.password ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.password" type="password" class="form-control" id="password" placeholder="Enter Password" v-bind:required="pageMode.create">
+                                                        <span v-if="errorData.password" class="text-danger">{{ errorData.password }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Confirm Password</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.confirmPassword ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.confirmPassword" type="password" class="form-control" id="confirmPassword" placeholder="Enter Confirm Password" v-bind:required="pageMode.create">
+                                                        <span v-if="errorData.confirmPassword" class="text-danger">{{ errorData.confirmPassword }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td><strong>Email Confirmed</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.emailConfirmed ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.emailConfirmed" type="checkbox" class="form-check-input" id="emailConfirmed">
+                                                        <span v-if="errorData.emailConfirmed" class="text-danger ms-2">{{ errorData.emailConfirmed }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td><strong>Blocked</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.isBlocked ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.isBlocked" type="checkbox" class="form-check-input" id="isBlocked">
+                                                        <span v-if="errorData.isBlocked" class="text-danger ms-2">{{ errorData.isBlocked }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Deleted</strong></td>
+                                                <td>:</td>
+                                                <td>
+                                                    <div v-show="pageMode.read || pageMode.delete">
+                                                        {{ paged.selectedRow?.isDeleted ?? 'N/A' }}
+                                                    </div>
+                                                    <div v-show="pageMode.create || pageMode.update" class="mb-3">
+                                                        <input v-model="formData.isDeleted" type="checkbox" class="form-check-input" id="isDeleted">
+                                                        <span v-if="errorData.isDeleted" class="text-danger ms-2">{{ errorData.isDeleted }}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="card-footer">
+                                <h6 class="fw-bold">Roles:</h6>
+
+                                <div v-if="memberRoles && Object.keys(memberRoles).length">
+                                    <div class="card-body">
+                                        <div class="card-footer">
+                                            <table class="table-light">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Role</th>
+                                                        <th>Have Access</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="role in memberRoles" :key="role">
+                                                        <td>{{ role }}</td>
+                                                        <td>
+                                                            <input type="checkbox" v-model="rolesTypesSelected[role]" v-bind:disabled="pageMode.read || pageMode.delete">
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <p>No roles available.</p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div v-show="pageMode.create || pageMode.update" class="card-footer text-end">
+                            <button type="button" class="btn btn-secondary me-2" v-on:click="handleClickClose">
+                                <i class="bi bi-arrow-left"></i> Close
+                            </button>
+                            <indobutton v-show="hasClaimAccess('Member:Create') || hasClaimAccess('Member:Update')" :type="'submit'"
+                                        :is-submitting="isSubmitting"
+                                        submitting-text="Submitting..."
+                                        button-class="btn btn-primary">
+                                <i class="bi bi-plus"></i> Submit
+                            </indobutton>
+                        </div>
+
+
+                    </div>
+                </form>
+
+                <div v-show="successMessage" class="alert alert-success mt-4 text-center">
+                    {{ successMessage }}
+                </div>
+
+
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-footer">
+                            <h6 class="fw-bold">Claims:</h6>
+                            <div v-if="memberClaims && Object.keys(memberClaims).length">
+                                <div class="card-body">
+                                    <div class="card-footer">
+                                        <table class="table-light">
+                                            <thead>
+                                                <tr>
+                                                    <th>Entity</th>
+                                                    <th>Create Access</th>
+                                                    <th>Read Access</th>
+                                                    <th>Update Access</th>
+                                                    <th>Delete Access</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(accessTypes, entity) in memberClaims" :key="entity">
+                                                    <td>{{ entity }}</td>
+                                                    <td>
+                                                        <input type="checkbox" v-model="claimsTypesSelected[entity].Create"
+                                                               disabled />
+                                                    </td>
+                                                    <td>
+                                                        <input type="checkbox" v-model="claimsTypesSelected[entity].Read"
+                                                               disabled />
+                                                    </td>
+                                                    <td>
+                                                        <input type="checkbox" v-model="claimsTypesSelected[entity].Update"
+                                                               disabled />
+                                                    </td>
+                                                    <td>
+                                                        <input type="checkbox" v-model="claimsTypesSelected[entity].Delete"
+                                                               disabled />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <p>No members available.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+

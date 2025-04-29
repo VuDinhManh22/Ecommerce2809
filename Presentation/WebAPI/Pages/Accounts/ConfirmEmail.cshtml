@@ -1,0 +1,50 @@
+﻿@page
+@{
+    Layout = null;
+    ViewBag.Title = "Confirm Email";
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+
+    <h2>@ViewBag.Title</h2>
+    <p id="statusMessage"></p>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const email = '@(Request.Query["email"])';
+            const code = '@(Request.Query["code"])';
+
+            if (email && code) {
+                fetch(`/api/Account/ConfirmEmail?email=${email}&code=${encodeURIComponent(code)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data?.code !== 200) {
+                            document.getElementById("statusMessage").textContent = "Error confirming your email.";
+                        } else {
+                            document.getElementById("statusMessage").textContent = "Success confirming your email.";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById("statusMessage").textContent = "Error confirming your email.";
+                    });
+            } else {
+                document.getElementById("statusMessage").textContent = "Invalid email or code.";
+            }
+        });
+    </script>
+
+</body>
+</html>

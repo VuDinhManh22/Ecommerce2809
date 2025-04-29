@@ -1,0 +1,65 @@
+﻿<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indotalent - @ViewBag.Title</title>
+
+
+    @* css *@
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/src/Theme/Auth.css" />
+    @await RenderSectionAsync("styles", required: false)
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+    </style>
+
+
+    @* javascript *@
+    <script async src="/libs/esmoduleshims/es-module-shims.min.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "vue": "/libs/vue/vue.esm-browser.prod.js",
+            "indosearchbox": "/src/Components/indosearchbox.js",
+            "indotable": "/src/Components/indotable.js",
+            "indobutton": "/src/Components/indobutton.js",
+            "indoskeleton": "/src/Components/indoskeleton.js",
+            "indoloading": "/src/Components/indoloading.js",
+            "useAxios": "/src/Composables/useAxios.js",
+            "useStorageManager": "/src/Composables/useStorageManager.js",
+            "useAccessManager": "/src/Composables/useAccessManager.js",
+            "usePagedList": "/src/Composables/usePagedList.js"
+          }
+        }
+    </script>
+    <script src="~/libs/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="~/libs/axios/axios.min.js" defer></script>
+    <script src="~/libs/sweetalert/sweetalert2v11.js" defer></script>
+
+
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Left column with image -->
+        <div class="left-column"></div>
+
+        <!-- Right column with login form -->
+        <div class="right-column">
+            @RenderBody()
+        </div>
+    </div>
+
+    @await RenderSectionAsync("scripts", required: false)
+</body>
+</html>

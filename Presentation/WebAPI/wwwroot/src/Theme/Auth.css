@@ -1,0 +1,55 @@
+﻿:root {
+    --sidebar-bg: #1e1e1e; /* VS Code black */
+    --sidebar-top-bg: #333; /* Dark gray for sidebar top */
+    --header-bg: #42b883; /* Vue.js color */
+    --footer-bg: #343a40; /* Dark color for footer */
+    --body-bg: white; /* White for body content */
+    --table-header-bg: #343a40; /* Dark color for table header */
+    --table-row-odd-bg: #f8f9fa; /* Light gray for odd rows */
+    --table-row-even-bg: #ffffff; /* White for even rows */
+}
+
+/* Full screen layout */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Container for the login layout */
+.login-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Left column (image area) */
+.left-column {
+    width: 70%;
+    background: url('/src/Theme/Img/placeholder800x600.png') no-repeat center center; /* Placeholder image */
+    background-size: cover; /* Cover the entire area */
+}
+
+/* Right column (form area) */
+.right-column {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa; /* Light background for the form area */
+}
+
+/* Form styling */
+.login-form {
+    width: 80%; /* Form width */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white; /* White background for the form */
+}
+
+/* Button styling */
+.btn-custom {
+    background-color: #42b883; /* Custom button color */
+    color: white;
+}

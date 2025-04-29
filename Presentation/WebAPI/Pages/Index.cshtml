@@ -1,0 +1,91 @@
+﻿@page
+@{
+    Layout = null;
+}
+<!-- ----------------------------------------------------------------------------
+     Developer:      Ismail Hamzah
+     Email:         go2ismail@gmail.com
+---------------------------------------------------------------------------- -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indotalent</title>
+
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="~/libs/bootstrap/dist/css/bootstrap-icons.css" />
+
+    <script async src="/libs/esmoduleshims/es-module-shims.min.js"></script>
+    <script src="~/libs/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header styling */
+        .header {
+            background-color: #343a40;
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        /* Hero section styling */
+        .hero-section {
+            height: 80vh;
+            background: url('/src/Theme/Img/placeholder1200x600.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Hero content styling */
+        .hero-content {
+            text-align: center;
+        }
+
+        /* Button area styling */
+        .btn-area {
+            margin-top: 20px;
+        }
+
+        /* Custom button styling */
+        .btn-custom {
+            background-color: #42b883;
+            color: white;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Welcome to Indotalent</h1>
+        <p>Enterprise-grade software architecture solutions</p>
+    </div>
+
+
+    <!-- Hero section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h2>Empower Your Future</h2>
+            <p>Join us and unlock your true potential</p>
+            <div class="btn-area">
+                <a href="/accounts/login" class="btn btn-custom btn-lg">Login</a>
+                <a href="/accounts/register" class="btn btn-custom btn-lg">Register</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
